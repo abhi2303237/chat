@@ -2,8 +2,11 @@ var http=require('http');
 var fs= require('fs');
 var bodyParser = require('body-parser');
 var jsonfile = require('jsonfile');
+var jsonQuery = require('json-query');
 var file = 'user.json';
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
+var arr = Array();
+var found=0;
 /*
 http.createServer(function (req,res){
 	res.writeHead(200, {'Content-Type': 'text/html'});
@@ -34,14 +37,34 @@ var str = '{ "user" : [ ]}';
 var obj = JSON.parse(str);
 */
 var obj = jsonfile.readFileSync(file);
-obj["user"].push('{"name":"' + name + '","email":"' + email + '","password":"' + password + '"}');
+//var jsonobj = obj["user"];
+arr= JSON.parse(obj);
+for(var i = 0; i<arr.length;i++){
+	var temp = arr[i];
+	temp=JSON.parse(temp);
 
-jsonfile.writeFile(file, obj, function (err) {
-  console.error(err)
-})
+	if (temp.email==email){
+		found=1;
+		break;
+	}
 
-console.log(obj);
-res.end('<script> alert("Registered") </script>');
+}
+
+if (found){
+	console.log(temp.email);
+	res.end('<script> alert("Email already exist") </script>');
+}
+else{
+
+		arr.push('{"name":"' + name + '","email":"' + email + '","password":"' + password + '"}');
+		console.log(arr);
+		obj=JSON.stringify(arr);
+		jsonfile.writeFile(file, obj, function (err) {
+          console.error(err)
+         })
+		res.end('<script> alert("Registered") </script>');
+	}
+
 
 });
 
